@@ -1,0 +1,1352 @@
+:root {
+  /* スイカ */
+  --rind-dark: #14532d;
+  --rind: #2f9e51;
+  --rind-light: #57c877;
+  --flesh: #ff5069;
+  --flesh-deep: #e23554;
+  --flesh-light: #ff8194;
+  --seed: #2b2118;
+  --pith: #f0fbe3;         /* 皮の内側の白 */
+  /* 夏の空 */
+  --sky-top: #b5ecff;
+  --sky-mid: #e6fbff;
+  --sun: #ffd23f;
+  /* インク・面 */
+  --ink: #234032;
+  --ink-soft: #5a7a66;
+  --card: #ffffff;
+  --shadow: 0 16px 34px rgba(20, 83, 45, 0.16);
+  --shadow-sm: 0 6px 16px rgba(20, 83, 45, 0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: 'Hiragino Maru Gothic ProN', 'M PLUS Rounded 1c', 'Rounded Mplus 1c',
+               -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  color: var(--ink);
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 480px at 88% -12%, rgba(255, 210, 63, 0.55), transparent 62%),
+    radial-gradient(900px 420px at 8% 108%, rgba(87, 200, 119, 0.28), transparent 60%),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 46%, #f3fff0 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+button { font-family: inherit; }
+
+/* ===== レイアウト ===== */
+.app { min-height: 100vh; position: relative; z-index: 1; }
+
+.header {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 12px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 16px rgba(20, 83, 45, 0.08);
+  border-bottom: 2px solid rgba(47, 158, 81, 0.14);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.logo {
+  font-size: 1.3rem;
+  font-weight: 900;
+  text-decoration: none;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  letter-spacing: 0.02em;
+}
+.logo-emoji {
+  display: inline-block;
+  font-size: 1.7rem;
+  animation: bobble 2.8s ease-in-out infinite;
+}
+
+/* 財布（いまの生徒とスイカポイント） */
+.wallet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wallet-name {
+  font-weight: 800;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+.wallet-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(180deg, var(--flesh-light), var(--flesh));
+  color: #fff;
+  font-weight: 900;
+  padding: 6px 15px 6px 12px;
+  border-radius: 999px;
+  box-shadow: 0 3px 0 var(--flesh-deep), 0 5px 12px rgba(226, 53, 84, 0.25);
+  font-size: 1.05rem;
+}
+.wallet-melon { font-size: 0.95rem; }
+.wallet-switch {
+  border: none;
+  background: rgba(20, 83, 45, 0.08);
+  color: var(--ink-soft);
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.wallet-switch:hover { background: rgba(20, 83, 45, 0.14); }
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 26px 24px 60px;
+}
+
+/* ===== 背景の種（ふわっと舞う） ===== */
+.field {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+/* 管理画面（職員の作業画面）では種を出さない。生徒向けのキオスク画面だけ装飾する。 */
+.app:has(.admin-page) .field { display: none; }
+.field span {
+  position: absolute;
+  bottom: -40px;
+  width: 11px;
+  height: 15px;
+  background: var(--seed);
+  border-radius: 52% 52% 50% 50% / 62% 62% 40% 40%;
+  opacity: 0.13;
+  left: calc(var(--i) * 7.1%);
+  animation: drift 17s linear infinite;
+  animation-delay: calc(var(--i) * -1.15s);
+}
+@keyframes drift {
+  0%   { transform: translateY(0) rotate(0deg);       opacity: 0; }
+  12%  { opacity: 0.14; }
+  100% { transform: translateY(-112vh) rotate(240deg); opacity: 0; }
+}
+
+/* ===== 見出し・共通 ===== */
+.title {
+  font-size: 2.15rem;
+  margin-bottom: 6px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+.subtitle { color: var(--ink-soft); font-weight: 800; }
+
+.melon { font-size: 0.95em; }
+
+/* ===== 生徒えらび ===== */
+.picker { text-align: center; padding-top: 8px; }
+.picker-head { margin-bottom: 8px; }
+.picker-melon {
+  display: inline-block;
+  font-size: 3.4rem;
+  animation: bobble 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 6px rgba(20, 83, 45, 0.2));
+}
+.picker .title { margin-top: 6px; }
+
+/* 大人数むけ: 検索ボックス＋あかさたなインデックス */
+.picker-tools {
+  max-width: 760px;
+  margin: 24px auto 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border: 2.5px solid #e2ece4;
+  border-radius: 999px;
+  padding: 4px 8px 4px 18px;
+  box-shadow: var(--shadow-sm);
+}
+.search-box:focus-within { border-color: var(--rind-light); }
+.search-ico { font-size: 1.1rem; opacity: 0.7; }
+.search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ink);
+  padding: 12px 4px;
+  min-width: 0;
+}
+.search-box input::placeholder { color: #a7b8ac; font-weight: 700; }
+.search-clear {
+  border: none;
+  flex-shrink: 0;
+  background: rgba(20, 83, 45, 0.1);
+  color: var(--ink-soft);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  font-weight: 900;
+  cursor: pointer;
+  line-height: 1;
+}
+.search-clear:hover { background: rgba(20, 83, 45, 0.16); }
+
+.kana-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+}
+.kana-tab {
+  min-width: 46px;
+  padding: 9px 12px;
+  border: 2px solid #e2ece4;
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 14px;
+  font-weight: 900;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s, border-color 0.15s;
+}
+.kana-tab:hover { border-color: var(--rind-light); }
+.kana-tab:active { transform: translateY(1px); }
+.kana-tab.active {
+  background: linear-gradient(180deg, var(--rind-light), var(--rind));
+  color: #fff;
+  border-color: var(--rind);
+  box-shadow: 0 4px 0 var(--rind-dark);
+}
+.picker-count {
+  text-align: center;
+  color: var(--ink-soft);
+  font-weight: 800;
+  font-size: 0.9rem;
+  margin: 12px 0 2px;
+}
+
+.student-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(142px, 1fr));
+  gap: 14px;
+  max-width: 900px;
+  margin: 12px auto 0;
+}
+.student-chip {
+  position: relative;
+  border: 3px solid #e7f4e8;
+  background: var(--card);
+  border-radius: 22px;
+  padding: 18px 12px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+.student-chip:hover {
+  transform: translateY(-4px);
+  border-color: var(--rind-light);
+  box-shadow: var(--shadow);
+}
+.student-chip:active { transform: translateY(-1px) scale(0.98); }
+.student-face {
+  font-size: 2.3rem;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.15));
+}
+.student-name { font-weight: 900; font-size: 1.1rem; color: var(--ink); }
+.student-pts {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--flesh-deep);
+  background: #fff1f3;
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+.empty-note {
+  text-align: center;
+  color: var(--ink-soft);
+  font-weight: 700;
+  line-height: 1.9;
+  background: var(--card);
+  max-width: 460px;
+  margin: 26px auto 0;
+  padding: 26px 22px;
+  border-radius: 22px;
+  box-shadow: var(--shadow-sm);
+  border: 2px dashed rgba(47, 158, 81, 0.3);
+}
+
+/* ===== ホーム ===== */
+.home { text-align: center; }
+.home-hero { margin-bottom: 26px; }
+.hero-hi { color: var(--ink-soft); font-weight: 800; margin-bottom: 2px; font-size: 1.02rem; }
+.hero-hi strong { color: var(--rind); }
+.wallet-big {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  background: var(--card);
+  padding: 10px 12px 10px 20px;
+  border-radius: 999px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  box-shadow: var(--shadow-sm);
+  border: 2px solid rgba(255, 80, 105, 0.16);
+}
+.wallet-big-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(180deg, var(--flesh-light), var(--flesh));
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.25rem;
+  padding: 6px 16px;
+  border-radius: 999px;
+  box-shadow: 0 3px 0 var(--flesh-deep);
+}
+
+.gacha-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(258px, 1fr));
+  gap: 22px;
+}
+
+.gacha-card {
+  background: var(--card);
+  border-radius: 26px;
+  padding: 24px 22px 26px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  border: 3px solid color-mix(in srgb, var(--theme) 22%, #fff);
+  animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  transition: transform 0.22s ease;
+}
+.gacha-card:hover { transform: translateY(-5px); }
+.gacha-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 8px;
+  background: var(--theme);
+}
+
+/* スイカ玉のアイコン枠 */
+.gacha-melon {
+  width: 104px;
+  height: 104px;
+  margin: 8px auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='26'%20height='24'%3E%3Cpath%20d='M13%200%20L9%206%20L13%2012%20L17%2018%20L13%2024'%20fill='none'%20stroke='%2314532d'%20stroke-opacity='0.55'%20stroke-width='7'%20stroke-linejoin='round'/%3E%3C/svg%3E") 0 0 / 26px 24px repeat,
+    radial-gradient(120% 120% at 32% 24%, var(--rind-light), var(--rind) 58%, var(--rind-dark));
+  box-shadow: inset -6px -9px 18px rgba(0, 0, 0, 0.22),
+              inset 6px 8px 16px rgba(255, 255, 255, 0.28),
+              0 8px 18px rgba(20, 83, 45, 0.18);
+  animation: wobble 4.4s ease-in-out infinite;
+}
+.gacha-icon-big { font-size: 3rem; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.28)); }
+
+.gacha-card h2 { font-size: 1.28rem; margin-bottom: 5px; font-weight: 900; }
+.gacha-card p { color: var(--ink-soft); margin-bottom: 14px; min-height: 2.6em; font-weight: 700; font-size: 0.95rem; }
+
+.cost-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 900;
+  font-size: 0.98rem;
+  padding: 5px 16px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+  background: #fff1f3;
+  color: var(--flesh-deep);
+  border: 1.5px solid rgba(255, 80, 105, 0.28);
+}
+.cost-tag[data-afford='0'] {
+  background: #f1f4f0;
+  color: #94a897;
+  border-color: #dbe4dc;
+}
+
+.gacha-buttons { display: flex; flex-direction: column; gap: 10px; }
+
+/* ===== ボタン ===== */
+.btn-melon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 26px;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 1.05rem;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  background: linear-gradient(180deg, var(--flesh-light), var(--flesh));
+  box-shadow: 0 6px 0 var(--flesh-deep), 0 10px 20px rgba(226, 53, 84, 0.22);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.btn-melon:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 var(--flesh-deep), 0 5px 12px rgba(226, 53, 84, 0.18);
+}
+.btn-melon.sm { padding: 9px 18px; font-size: 0.92rem; box-shadow: 0 4px 0 var(--flesh-deep); }
+.btn-melon.disabled {
+  background: #cdd8cf;
+  box-shadow: 0 6px 0 #b1c0b4;
+  color: #fff;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-sub {
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.28);
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.btn-ghost {
+  display: inline-block;
+  padding: 10px 22px;
+  background: rgba(20, 83, 45, 0.06);
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+.btn-ghost:hover { background: rgba(20, 83, 45, 0.11); }
+.btn-ghost.danger { color: var(--flesh-deep); background: rgba(226, 53, 84, 0.1); }
+
+/* ===== 汎用ページ ===== */
+.back-link {
+  display: inline-block;
+  color: var(--ink-soft);
+  text-decoration: none;
+  margin-bottom: 18px;
+  font-weight: 800;
+  font-size: 0.92rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-sm);
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.7rem;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+.page-title-chip {
+  display: inline-flex;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.4rem;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== ガチャページ ===== */
+.gacha-page { text-align: center; }
+/* ガチャ名（.page-title は flex で左寄せ）の真下に説明文を左揃えで並べる。
+   ぴったり左端だと詰まって見えるので少しだけ右へインデント。 */
+.gacha-page .description { color: var(--ink-soft); margin-bottom: 20px; font-weight: 700; text-align: left; padding-left: calc(12px + 3.5em); }
+
+.error-box {
+  background: #fff1f3;
+  border: 2px solid #ffc3cd;
+  color: var(--flesh-deep);
+  padding: 12px 20px;
+  border-radius: 16px;
+  display: inline-block;
+  margin-bottom: 12px;
+  font-weight: 800;
+}
+
+.gacha-stage {
+  min-height: 470px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px auto;
+}
+
+/* ===== スイカ割り: スタート画面 ===== */
+.smash-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.smash-peek {
+  position: relative;
+  width: 210px;
+  height: 168px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.smash-peek-melon {
+  font-size: 8rem;
+  line-height: 1;
+  filter: drop-shadow(0 12px 10px rgba(20, 83, 45, 0.28));
+  animation: bobble 2.6s ease-in-out infinite;
+}
+.smash-peek-stick {
+  position: absolute;
+  right: 6px;
+  top: 2px;
+  width: 20px;
+  height: 128px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #8a5a2c, #cf9455 45%, #a9743f);
+  box-shadow: inset -3px 0 4px rgba(0, 0, 0, 0.3), 0 6px 10px rgba(0, 0, 0, 0.2);
+  transform-origin: 50% 100%;
+  animation: stickTease 2.6s ease-in-out infinite;
+}
+@keyframes stickTease {
+  0%, 100% { transform: rotate(26deg); }
+  50%      { transform: rotate(12deg); }
+}
+
+/* ボタンだけ揺らす（ラッパーを揺らして、ボタン自身の押下transformは温存）。
+   下のポイント表示は揺らさない。 */
+.smash-start-wrap {
+  display: inline-block;
+  margin-top: 29px;
+  animation: gentle-wobble 3.4s ease-in-out infinite;
+}
+
+.smash-start {
+  border: none;
+  cursor: pointer;
+  padding: 18px 42px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(180deg, var(--flesh-light), var(--flesh));
+  box-shadow: 0 8px 0 var(--flesh-deep), 0 15px 22px rgba(226, 53, 84, 0.28);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.smash-start:not(:disabled):hover { transform: translateY(-2px); }
+.smash-start:not(:disabled):active {
+  transform: translateY(6px);
+  box-shadow: 0 2px 0 var(--flesh-deep), 0 6px 12px rgba(226, 53, 84, 0.24);
+}
+.smash-start:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+  opacity: 0.62;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18);
+}
+
+/* 必要ポイント／所持ポイントを、ラベル＋色でハッキリ分ける */
+.cost-panel {
+  margin-top: 20px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.cost-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 9px 22px;
+  border-radius: 16px;
+  min-width: 128px;
+}
+.cost-chip-label { font-size: 0.82rem; font-weight: 800; letter-spacing: 0.02em; }
+.cost-chip-value {
+  font-size: 1.55rem;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.cost-chip-value .melon { font-size: 0.9em; }
+
+/* 必要（赤系） */
+.cost-need { background: #fff1f3; border: 2px solid #ffc3cd; }
+.cost-need .cost-chip-label { color: var(--flesh-deep); }
+.cost-need .cost-chip-value { color: var(--flesh-deep); }
+
+/* 所持（緑系） */
+.cost-have { background: #eef8ec; border: 2px solid rgba(20, 83, 45, 0.16); }
+.cost-have .cost-chip-label { color: var(--ink-soft); }
+.cost-have .cost-chip-value { color: var(--ink); }
+.need-more {
+  margin-top: 10px;
+  color: var(--flesh-deep);
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+/* ===== スイカ割り: スイカ＆棒 ===== */
+.smash-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: smashIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes smashIn {
+  0%   { transform: translateY(-40px) scale(0.7); opacity: 0; }
+  100% { transform: translateY(0) scale(1);       opacity: 1; }
+}
+
+.golden-banner {
+  font-weight: 900;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  color: #7a5200;
+  background: linear-gradient(180deg, #fff3c4, var(--sun));
+  padding: 8px 20px;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(255, 178, 20, 0.5);
+  animation: goldenPulse 1.1s ease-in-out infinite;
+}
+@keyframes goldenPulse {
+  0%, 100% { transform: scale(1);    box-shadow: 0 6px 16px rgba(255, 178, 20, 0.5); }
+  50%      { transform: scale(1.05); box-shadow: 0 6px 26px rgba(255, 178, 20, 0.85); }
+}
+
+.smash-arena {
+  position: relative;
+  width: 300px;
+  height: 250px;
+}
+
+/* スイカ本体（タップで割る大きなボタン） */
+.big-melon {
+  position: absolute;
+  left: 40px;
+  top: 20px;
+  width: 220px;
+  height: 220px;
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.big-melon:disabled { cursor: default; }
+.big-melon:not(:disabled) { animation: melonReady 1.6s ease-in-out infinite; }
+@keyframes melonReady {
+  0%, 100% { transform: translateY(0)    rotate(-2deg); }
+  50%      { transform: translateY(-6px) rotate(2deg); }
+}
+
+/* 左右の皮（合わさって丸いスイカ。割れると左右に飛ぶ） */
+.melon-half {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background:
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='24'%3E%3Cpath%20d='M20%200%20L16%206%20L20%2012%20L24%2018%20L20%2024'%20fill='none'%20stroke='%2314532d'%20stroke-opacity='0.55'%20stroke-width='7'%20stroke-linejoin='round'/%3E%3C/svg%3E") 0 0 / 40px 24px repeat,
+    radial-gradient(120% 120% at 40% 22%, var(--rind-light), var(--rind) 55%, var(--rind-dark));
+  box-shadow: inset -10px -14px 26px rgba(0, 0, 0, 0.28),
+              inset 8px 10px 20px rgba(255, 255, 255, 0.22);
+}
+.melon-half.left  { left: 0;  border-radius: 110px 0 0 110px; }
+.melon-half.right { right: 0; border-radius: 0 110px 110px 0; }
+
+/* 金色スイカ（SR以上確定） */
+.big-melon.golden { filter: drop-shadow(0 0 18px rgba(255, 200, 40, 0.85)); }
+.big-melon.golden .melon-half {
+  background:
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='24'%3E%3Cpath%20d='M20%200%20L16%206%20L20%2012%20L24%2018%20L20%2024'%20fill='none'%20stroke='%23b47800'%20stroke-opacity='0.4'%20stroke-width='7'%20stroke-linejoin='round'/%3E%3C/svg%3E") 0 0 / 40px 24px repeat,
+    radial-gradient(120% 120% at 40% 22%, #fff2b0, var(--sun) 52%, #d98a12);
+  box-shadow: inset -10px -14px 26px rgba(120, 80, 0, 0.3),
+              inset 8px 10px 20px rgba(255, 255, 255, 0.5);
+}
+
+/* 中身の果肉（割れると見える） */
+.melon-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 168px;
+  height: 168px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 50% 42%, var(--flesh-light), var(--flesh) 62%, var(--flesh-deep));
+  box-shadow: inset 0 0 0 10px var(--pith);
+}
+
+/* 中から出てくる景品 */
+.melon-prize {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 5rem;
+  opacity: 0;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.22));
+  z-index: 3;
+}
+
+/* 割れる演出 */
+.big-melon.breaking { animation: none; }
+.big-melon.breaking .melon-half.left  { animation: halfLeft  1.2s ease-out forwards; }
+.big-melon.breaking .melon-half.right { animation: halfRight 1.2s ease-out forwards; }
+.big-melon.breaking .melon-prize      { animation: prizeOut  0.9s cubic-bezier(0.34, 1.7, 0.64, 1) 0.4s forwards; }
+@keyframes halfLeft {
+  0%   { transform: translate(0, 0) rotate(0deg);        opacity: 1; }
+  22%  { transform: translate(0, 0) rotate(0deg);        opacity: 1; }
+  100% { transform: translate(-120px, 92px) rotate(-46deg); opacity: 0; }
+}
+@keyframes halfRight {
+  0%   { transform: translate(0, 0) rotate(0deg);        opacity: 1; }
+  22%  { transform: translate(0, 0) rotate(0deg);        opacity: 1; }
+  100% { transform: translate(120px, 92px) rotate(46deg);   opacity: 0; }
+}
+@keyframes prizeOut {
+  0%   { transform: translate(-50%, -50%) scale(0);  opacity: 0; }
+  100% { transform: translate(-50%, -92%) scale(1);  opacity: 1; }
+}
+
+/* 種（果肉に描かれた種。皮が割れると見える。飛び散らない） */
+.seed-burst { position: absolute; inset: 0; }
+.seed-burst span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 13px;
+  background: var(--seed);
+  border-radius: 52% 52% 50% 50% / 62% 62% 40% 40%;
+  transform: translate(-50%, -50%) rotate(var(--r)) translateY(-46px);
+}
+
+/* 棒 */
+.smash-stick {
+  position: absolute;
+  right: 4px;
+  top: -10px;
+  width: 22px;
+  height: 168px;
+  border-radius: 11px;
+  background: linear-gradient(90deg, #8a5a2c, #cf9455 45%, #a9743f);
+  box-shadow: inset -4px 0 5px rgba(0, 0, 0, 0.32), 0 8px 12px rgba(0, 0, 0, 0.2);
+  transform-origin: 50% 100%;
+  transform: rotate(30deg);
+}
+.smash-stick.swing { animation: stickSwing 0.5s cubic-bezier(0.5, 0, 0.75, 0) forwards; }
+@keyframes stickSwing {
+  0%   { transform: rotate(30deg); }
+  60%  { transform: rotate(-58deg); }
+  100% { transform: rotate(-42deg); }
+}
+
+.smash-hint {
+  font-size: 1.3rem;
+  color: var(--ink-soft);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  animation: pulse 0.9s ease-in-out infinite;
+}
+
+.golden-tag {
+  font-weight: 900;
+  color: #7a5200;
+  background: linear-gradient(180deg, #fff3c4, var(--sun));
+  padding: 6px 18px;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(255, 178, 20, 0.5);
+}
+
+/* ===== 結果 ===== */
+.result-stage { display: flex; flex-direction: column; align-items: center; gap: 24px; width: 100%; }
+.result-card {
+  background: var(--card);
+  border-radius: 28px;
+  padding: 36px 32px 32px;
+  box-shadow: 0 18px 42px rgba(20, 83, 45, 0.18);
+  position: relative;
+  min-width: 280px;
+  max-width: 380px;
+  animation: pop-in 0.55s cubic-bezier(0.34, 1.7, 0.64, 1);
+  border: 5px solid #cfe0d3;
+  overflow: hidden;
+}
+.result-card.rarity-N   { border-color: #b7cdbc; }
+.result-card.rarity-R   { border-color: #37bde0; background: linear-gradient(180deg, #fff, #edfbff); }
+.result-card.rarity-SR  { border-color: var(--flesh); background: linear-gradient(180deg, #fff, #fff1f3); }
+.result-card.rarity-SSR {
+  border-color: var(--sun);
+  background: linear-gradient(180deg, #fff, #fff7df);
+  animation: pop-in 0.55s cubic-bezier(0.34, 1.7, 0.64, 1), glow 1.6s ease-in-out infinite;
+}
+@keyframes glow {
+  0%, 100% { box-shadow: 0 18px 42px rgba(20, 83, 45, 0.18), 0 0 18px rgba(255, 210, 63, 0.55); }
+  50%      { box-shadow: 0 18px 42px rgba(20, 83, 45, 0.18), 0 0 40px rgba(255, 210, 63, 0.95); }
+}
+
+.rarity-badge {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: #b7cdbc;
+  color: #fff;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+.result-card.rarity-R   .rarity-badge { background: #37bde0; }
+.result-card.rarity-SR  .rarity-badge { background: var(--flesh); }
+.result-card.rarity-SSR .rarity-badge { background: linear-gradient(135deg, var(--sun), #ff9838); }
+
+.result-emoji {
+  font-size: 5.6rem;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.18));
+  animation: bobble 1.6s ease-in-out infinite;
+}
+.result-name { font-size: 1.6rem; margin-bottom: 6px; font-weight: 900; }
+.result-desc { color: var(--ink-soft); margin-bottom: 12px; font-weight: 700; }
+.result-message {
+  color: var(--flesh);
+  font-weight: 900;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+}
+.result-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+
+.actions { margin-top: 10px; }
+
+/* ===== 景品ページ ===== */
+.rarity-section { margin-bottom: 30px; }
+.rarity-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 22px;
+  border-radius: 999px;
+  color: #fff;
+  margin: 16px 0;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  box-shadow: var(--shadow-sm);
+}
+.rarity-header .rarity-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.32);
+  padding: 2px 10px;
+  border-radius: 999px;
+  letter-spacing: 0;
+}
+.rarity-header.rarity-N   { background: #8fae98; }
+.rarity-header.rarity-R   { background: #37bde0; }
+.rarity-header.rarity-SR  { background: var(--flesh); }
+.rarity-header.rarity-SSR { background: linear-gradient(135deg, var(--sun), #ff9838); }
+
+.prize-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 16px;
+}
+.prize-card {
+  background: var(--card);
+  border-radius: 22px;
+  padding: 18px 14px 16px;
+  text-align: center;
+  border: 3px solid #e4efe6;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  transition: transform 0.2s ease;
+  overflow: hidden;
+}
+.prize-card:hover { transform: translateY(-3px); }
+.prize-card.rarity-N   { border-color: #d3e2d6; }
+.prize-card.rarity-R   { border-color: #aee6f4; }
+.prize-card.rarity-SR  { border-color: #ffbfca; }
+.prize-card.rarity-SSR { border-color: #ffe08a; background: linear-gradient(180deg, #fff 0%, #fff8e3 100%); }
+.prize-card.sold { opacity: 0.55; filter: grayscale(0.4); }
+
+.prize-bubble {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 8px;
+  background: radial-gradient(circle at 34% 28%, #fff, #eef8ec);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset -3px -5px 12px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+.prize-emoji { font-size: 2.4rem; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15)); }
+.prize-card h3 { font-size: 0.98rem; margin-bottom: 4px; font-weight: 900; }
+.prize-desc { font-size: 0.78rem; color: var(--ink-soft); margin-bottom: 10px; min-height: 1em; }
+
+.prize-meta { display: flex; justify-content: space-around; font-size: 0.82rem; font-weight: 800; }
+.probability { color: var(--flesh-deep); }
+.stock { color: var(--ink-soft); }
+
+.sold-out-tag {
+  position: absolute;
+  top: 10px;
+  right: -22px;
+  background: var(--flesh-deep);
+  color: #fff;
+  padding: 4px 24px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  transform: rotate(35deg);
+}
+
+/* ===== 獲得景品（生徒本人向け。いつ何を当てたかの時系列ログ。景品渡しの照合用） ===== */
+.wins-link-row { margin-top: 14px; }
+.wins-link { display: inline-block; }
+
+.wins-page { text-align: center; }
+
+.win-log {
+  list-style: none;
+  max-width: 600px;
+  margin: 20px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.win-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  text-align: left;
+  background: var(--card);
+  border: 2px solid #e4efe6;
+  border-left-width: 7px;
+  border-radius: 14px;
+  padding: 11px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.win-row.rarity-N   { border-left-color: #cdd8cf; }
+.win-row.rarity-R   { border-left-color: #37bde0; }
+.win-row.rarity-SR  { border-left-color: var(--flesh); }
+.win-row.rarity-SSR { border-left-color: var(--sun); }
+
+.win-time {
+  font-weight: 800;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.win-emoji { font-size: 1.8rem; line-height: 1; }
+.win-name { font-weight: 900; color: var(--ink); font-size: 1.05rem; flex: 1; min-width: 100px; }
+.win-deliver {
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+  padding: 4px 11px;
+  border-radius: 999px;
+}
+.win-deliver.done    { background: rgba(58, 165, 93, 0.16); color: #237a41; }
+.win-deliver.pending { background: rgba(226, 53, 84, 0.12); color: var(--flesh-deep); }
+.win-gacha {
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+  font-weight: 800;
+  white-space: nowrap;
+  background: rgba(20, 83, 45, 0.07);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+/* ===== 管理画面 ===== */
+.admin-page h2 { margin-bottom: 0; }
+
+.stats-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  background: var(--card);
+  padding: 16px 20px;
+  border-radius: 20px;
+  margin: 16px 0 24px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  background: #eef8ec;
+  padding: 10px 18px;
+  border-radius: 14px;
+  min-width: 120px;
+}
+.stat-label { font-size: 0.75rem; color: var(--ink-soft); font-weight: 800; }
+.stat-value { font-size: 1.5rem; font-weight: 900; color: var(--ink); }
+
+.admin-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.admin-section-head h2 { font-size: 1.2rem; }
+
+/* スイカポイントの累計（付与/使用/残高合計） */
+.points-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pt-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #eef8ec;
+  padding: 8px 16px;
+  border-radius: 14px;
+  min-width: 110px;
+}
+.pt-label { font-size: 0.72rem; color: var(--ink-soft); font-weight: 800; }
+.pt-value { font-size: 1.2rem; font-weight: 900; color: var(--flesh-deep); }
+
+.admin-students {
+  background: var(--card);
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+  border: 2px solid rgba(255, 80, 105, 0.14);
+}
+
+.student-table, .prize-table, .stats-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.prize-table, .stats-table { min-width: 700px; }
+.student-table { min-width: 780px; }
+.student-table th, .student-table td,
+.prize-table th, .prize-table td,
+.stats-table th, .stats-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #eef4ee;
+  vertical-align: middle;
+}
+.student-table th, .prize-table th, .stats-table th {
+  background: #f6fbf4;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  font-weight: 800;
+}
+.student-cell { font-weight: 900; font-size: 1rem; }
+.points-cell { font-weight: 900; color: var(--flesh-deep); font-size: 1.05rem; white-space: nowrap; }
+.granted-cell { font-weight: 800; color: var(--rind-dark); white-space: nowrap; }
+.spent-cell { font-weight: 800; color: var(--ink-soft); white-space: nowrap; }
+.give-cell { display: flex; gap: 6px; flex-wrap: wrap; }
+.give-cell button {
+  border: none;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #eafaef;
+  color: var(--rind-dark);
+  font-size: 0.82rem;
+}
+.give-cell button:hover { background: #d7f4e0; }
+.give-cell button.minus { background: #fdecef; color: var(--flesh-deep); }
+.give-cell button.minus:hover { background: #fbd9df; }
+.empty-cell { color: var(--ink-soft); font-weight: 700; text-align: center; padding: 22px; }
+
+.gacha-cost-badge {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.28);
+  padding: 3px 12px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.prize-table tr.inactive { opacity: 0.45; }
+.emoji-cell { font-size: 1.6rem; width: 40px; }
+.prize-name { font-weight: 800; }
+.prize-sub { font-size: 0.78rem; color: var(--ink-soft); }
+.out { color: var(--flesh-deep); font-weight: 800; }
+
+.admin-gacha {
+  background: var(--card);
+  border-radius: 22px;
+  overflow: hidden;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow-sm);
+}
+.admin-gacha-header {
+  padding: 14px 20px;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.admin-gacha-header h2 { font-size: 1.15rem; }
+.admin-gacha-actions { display: flex; gap: 8px; }
+.admin-gacha-actions button {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.table-scroll { overflow-x: auto; }
+
+.rarity-tag {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+.rarity-tag.rarity-N   { background: #8fae98; }
+.rarity-tag.rarity-R   { background: #37bde0; }
+.rarity-tag.rarity-SR  { background: var(--flesh); }
+.rarity-tag.rarity-SSR { background: linear-gradient(135deg, var(--sun), #ff9838); }
+
+/* ポイント操作＋編集/削除を1セルに横並び */
+.ops-cell { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ops-cell .give-cell, .ops-cell .actions-cell { display: inline-flex; }
+.ops-divider { width: 1px; min-height: 22px; align-self: center; background: #e2ece4; }
+
+.actions-cell { display: flex; gap: 6px; flex-wrap: wrap; }
+.actions-cell button {
+  padding: 5px 12px;
+  border: 1.5px solid #e2ece4;
+  background: #fff;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #4a5c50;
+}
+.actions-cell button:hover { background: #f0f8f1; }
+.actions-cell button.danger { border-color: #fbcdd5; color: var(--flesh-deep); }
+
+.admin-stats {
+  background: var(--card);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 28px;
+}
+.log-count { font-size: 0.82rem; color: var(--ink-soft); font-weight: 800; white-space: nowrap; }
+.log-time { white-space: nowrap; color: var(--ink-soft); font-weight: 700; font-size: 0.85rem; }
+.log-student { font-weight: 900; white-space: nowrap; }
+
+/* 景品の引き渡しチェック */
+.deliver-cell { white-space: nowrap; }
+.deliver-na { color: #c3cec6; font-weight: 800; }
+.deliver-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 0.82rem;
+  color: var(--flesh-deep);
+  user-select: none;
+}
+.deliver-check input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--rind); }
+.deliver-check.done { color: #237a41; }
+.delivered-row { background: rgba(58, 165, 93, 0.06); }
+
+/* 全履歴を出しても長くなりすぎないよう、表の中だけ縦スクロール＋見出し固定 */
+.log-scroll { max-height: 62vh; overflow-y: auto; }
+.log-scroll table { min-width: 720px; }
+.log-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: inset 0 -1px 0 #eef4ee;
+}
+
+/* ===== モーダル ===== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 40, 28, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fade-in 0.2s ease;
+  padding: 16px;
+}
+.modal {
+  background: #fff;
+  border-radius: 24px;
+  padding: 28px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.3);
+  animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal h3 { margin-bottom: 18px; font-size: 1.25rem; }
+.modal form { display: flex; flex-direction: column; gap: 14px; }
+.modal label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #4a5c50;
+}
+.modal label.checkbox { flex-direction: row; align-items: center; gap: 8px; }
+.modal .row { display: flex; gap: 12px; }
+.modal .flex-1 { flex: 1; }
+.modal .emoji-input input { width: 70px; text-align: center; font-size: 1.4rem; }
+
+.modal input, .modal select {
+  padding: 10px 14px;
+  border: 2px solid #e2ece4;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ink);
+  background: #f8fcf7;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.modal input:focus, .modal select:focus { border-color: var(--flesh); }
+.modal input[type="color"] { padding: 4px; height: 44px; cursor: pointer; }
+
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+.modal-actions button {
+  padding: 10px 22px;
+  border: 2px solid #e2ece4;
+  background: #fff;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #4a5c50;
+}
+.modal-actions button.primary { background: var(--flesh); color: #fff; border-color: var(--flesh); }
+
+.loading { text-align: center; padding: 80px 0; color: var(--ink-soft); font-weight: 800; }
+
+/* ===== キーフレーム ===== */
+@keyframes pop-in {
+  0%   { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+@keyframes bobble {
+  0%, 100% { transform: translateY(0)    rotate(0deg); }
+  50%      { transform: translateY(-6px) rotate(-3deg); }
+}
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg)  scale(1); }
+  25%      { transform: rotate(-4deg) scale(1.02); }
+  75%      { transform: rotate(4deg)  scale(1.02); }
+}
+@keyframes gentle-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(1.6deg); }
+}
+@keyframes capFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; transform: scale(1.06); }
+}
+@keyframes dropBounce {
+  0%   { transform: translateY(-270px) rotate(0deg);   opacity: 0; }
+  15%  { opacity: 1; }
+  40%  { transform: translateY(0)      rotate(360deg); }
+  55%  { transform: translateY(-80px)  rotate(540deg); }
+  70%  { transform: translateY(0)      rotate(720deg); }
+  82%  { transform: translateY(-30px)  rotate(820deg); }
+  92%  { transform: translateY(0)      rotate(900deg); }
+  100% { transform: translateY(0)      rotate(900deg); }
+}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 600px) {
+  main { padding: 16px 16px 48px; }
+  .title { font-size: 1.7rem; }
+  .gacha-card { padding: 20px 16px; }
+  .melon-dome { width: 208px; height: 190px; }
+  .machine-body { width: 224px; }
+  .dome-glass { width: 132px; height: 132px; }
+  .knob { width: 108px; height: 108px; }
+  .modal { padding: 22px; }
+  .wallet-name { display: none; }
+}

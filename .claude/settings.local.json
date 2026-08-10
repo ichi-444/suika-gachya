@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"require\\('./server/index.js'\\)\")",
+      "Bash(kill %1)",
+      "Bash(npx vite *)",
+      "Bash(lsof -nP -iTCP:3001 -sTCP:LISTEN)",
+      "Bash(lsof -nP -iTCP:5173 -sTCP:LISTEN)",
+      "Bash(ps -o pid,ppid,command -ax)",
+      "Bash(curl -s http://localhost:3001/)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3001/api/students/7/pulls)",
+      "Bash(ps -o pid,command -ax)",
+      "Bash(npm *)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(curl -s http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:5173/api/students/7/pulls)",
+      "Bash(curl -s http://localhost:3001/api/admin/students)",
+      "Bash(curl -s -X POST http://localhost:3001/api/admin/pulls/90/delivered -H 'Content-Type: application/json' -d '{\"delivered\":false}')",
+      "Read(//Users/ichi/toushin/**)",
+      "Bash(rm -f ~/Downloads/gachya.zip)",
+      "Bash(COPYFILE_DISABLE=1 zip -r -X ~/Downloads/gachya.zip gachya -x gachya/node_modules/* -x gachya/client/node_modules/* -x gachya/client/src/* -x *.DS_Store -x gachya/server/gacha.db-wal -x gachya/server/gacha.db-shm -x gachya/.claude/*)",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(unzip -l ~/Downloads/gachya.zip)",
+      "Bash(grep -E 'client/dist/index.html|server/index.js|server/node_modules/express/package.json|gachya/ガチャ起動.bat|server/gacha.db$')",
+      "Bash(unzip -Z1 ~/Downloads/gachya.zip)",
+      "Bash(grep -E '^gachya/[^/]+$')",
+      "Bash(python3 *)",
+      "Bash(node -e \"const{DatabaseSync}=require\\('node:sqlite'\\);const db=new DatabaseSync\\('server/gacha.db'\\);db.exec\\('PRAGMA wal_checkpoint\\(TRUNCATE\\)'\\);db.close\\(\\);console.log\\('checkpoint OK'\\);\")",
+      "Bash(cp server/gacha.db ~/Downloads/gacha.db)",
+      "Bash(node -e \"const{DatabaseSync}=require\\('node:sqlite'\\);const db=new DatabaseSync\\(process.env.HOME+'/Downloads/gacha.db'\\);console.log\\('ガチャ:'\\);for\\(const g of db.prepare\\('SELECT key,name,cost FROM gachas ORDER BY sort_order'\\).all\\(\\)\\)console.log\\('  '+g.name+' / '+g.cost+'pt'\\);console.log\\('景品数:',db.prepare\\('SELECT COUNT\\(*\\) n FROM prizes'\\).get\\(\\).n\\);\")",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(git --version)",
+      "Bash(git config *)",
+      "Read(//Users/ichi/**)",
+      "Bash(ssh -o BatchMode=yes -o ConnectTimeout=5 -T git@github.com)"
+    ]
+  }
+}
